@@ -1,0 +1,73 @@
+# ---------------------------------------
+# Candidate Elimination Algorithm
+# ---------------------------------------
+
+import numpy as np
+import pandas as pd
+
+# -----------------------------
+# Embedded dataset
+# -----------------------------
+# Columns: Sky, AirTemp, Humidity, Wind, Water, Forecast, EnjoySport
+data = pd.DataFrame([
+    ['sunny', 'warm', 'normal', 'strong', 'warm', 'same', 'yes'],
+    ['sunny', 'warm', 'high',   'strong', 'warm', 'same', 'yes'],
+    ['rainy', 'cold', 'high',   'strong', 'warm', 'change', 'no'],
+    ['sunny', 'warm', 'high',   'strong', 'cool', 'change', 'yes']
+], columns=['Sky', 'AirTemp', 'Humidity', 'Wind', 'Water', 'Forecast', 'EnjoySport'])
+
+print("\n--- Training Data ---\n")
+print(data)
+
+# Separate features and target
+concepts = np.array(data.iloc[:, :-1])
+target = np.array(data.iloc[:, -1])
+
+# -----------------------------
+# Candidate Elimination Function
+# -----------------------------
+def candidate_elimination(concepts, target):
+    # Step 1: Initialize specific and general hypotheses
+    specific_h = concepts[0].copy()
+    general_h = [["?" for _ in range(len(specific_h))] for _ in range(len(specific_h))]
+
+    print("\nInitialization:")
+    print("Specific Hypothesis:", specific_h)
+    print("General Hypothesis:", general_h)
+
+    # Step 2: Iterate over all training examples
+    for i, instance in enumerate(concepts):
+        if target[i].lower() == "yes":   # Positive example
+            print(f"\nInstance {i+1} is Positive: {instance}")
+            for attr in range(len(specific_h)):
+                if instance[attr] != specific_h[attr]:
+                    specific_h[attr] = '?'   # Generalize
+                    general_h[attr][attr] = '?'
+
+        elif target[i].lower() == "no":  # Negative example
+            print(f"\nInstance {i+1} is Negative: {instance}")
+            for attr in range(len(specific_h)):
+                if instance[attr] != specific_h[attr]:
+                    general_h[attr][attr] = specific_h[attr]
+                else:
+                    general_h[attr][attr] = '?'
+
+        # Print intermediate hypotheses
+        print(f"Step {i+1}:")
+        print("Specific Hypothesis:", specific_h)
+        print("General Hypothesis:", general_h)
+
+    # Step 3: Remove redundant general hypotheses
+    general_h = [h for h in general_h if h != ['?'] * len(specific_h)]
+
+    return specific_h, general_h
+
+# Run the algorithm
+s_final, g_final = candidate_elimination(concepts, target)
+
+# -----------------------------
+# Final Results
+# -----------------------------
+print("\n--- Final Hypotheses ---")
+print("Specific Hypothesis:", s_final)
+print("General Hypothesis:", g_final)

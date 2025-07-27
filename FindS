@@ -1,0 +1,45 @@
+# -------------------------------
+# Find-S Algorithm Implementation
+# -------------------------------
+
+# Sample dataset (attributes + target)
+# Format: [Sky, AirTemp, Humidity, Wind, Water, Forecast, EnjoySport]
+dataset = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'yes'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'yes'],
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'no'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'yes']
+]
+
+num_attributes = len(dataset[0]) - 1  # Last column is target (yes/no)
+
+print("\n--- Given Training Data Set ---\n")
+for row in dataset:
+    print(row)
+
+# Step 1: Initialize the hypothesis with the first positive example
+hypothesis = ['0'] * num_attributes  # Start with the most specific hypothesis
+print("\nInitial Hypothesis:", hypothesis)
+
+# Find first positive example to initialize
+for row in dataset:
+    if row[-1] == 'yes':
+        hypothesis = row[:-1].copy()  # All attributes except target
+        break
+
+print("\nHypothesis after first positive example:", hypothesis)
+
+print("\n--- Find-S Algorithm Execution ---\n")
+
+# Step 2: Iterate through the dataset
+for i, row in enumerate(dataset):
+    if row[-1] == 'yes':  # Only consider positive examples
+        for j in range(num_attributes):
+            if row[j] != hypothesis[j]:
+                hypothesis[j] = '?'  # Generalize if different
+
+        print(f"For training instance {i+1}: Hypothesis → {hypothesis}")
+
+# Step 3: Final hypothesis
+print("\n--- Final Maximally Specific Hypothesis ---")
+print(hypothesis)

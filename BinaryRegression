@@ -1,0 +1,80 @@
+# ---------------------------------------
+# Binary Regression (Logistic Regression)
+# ---------------------------------------
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+
+# -----------------------------
+# Generate Synthetic Data
+# -----------------------------
+np.random.seed(42)
+num_samples = 100
+X = np.random.randn(num_samples, 2)
+y = (X[:, 0] + X[:, 1] > 0).astype(int)  # Binary target: 1 if sum > 0, else 0
+
+# Convert to DataFrame
+df = pd.DataFrame(X, columns=['Feature1', 'Feature2'])
+df['Target'] = y
+
+print("\n--- Sample Data ---\n")
+print(df.head())
+
+# -----------------------------
+# Feature & Target Split
+# -----------------------------
+X = df[['Feature1', 'Feature2']]
+y = df['Target']
+
+# -----------------------------
+# Train-Test Split
+# -----------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# -----------------------------
+# Model Training
+# -----------------------------
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# -----------------------------
+# Predictions & Evaluation
+# -----------------------------
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+print(f"\nAccuracy: {accuracy:.2f}")
+print("\nConfusion Matrix:\n", conf_matrix)
+print("\nClassification Report:\n", class_report)
+
+# -----------------------------
+# Decision Boundary Plot
+# -----------------------------
+plt.figure(figsize=(8, 6))
+
+# Meshgrid for background
+x_min, x_max = X_train['Feature1'].min() - 1, X_train['Feature1'].max() + 1
+y_min, y_max = X_train['Feature2'].min() - 1, X_train['Feature2'].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02),
+                     np.arange(y_min, y_max, 0.02))
+
+Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+plt.scatter(X_train['Feature1'], X_train['Feature2'],
+            c=y_train, edgecolors='k', cmap='coolwarm')
+plt.xlabel('Feature1')
+plt.ylabel('Feature2')
+plt.title('Decision Boundary and Training Data')
+plt.grid(True)
+plt.show()
